@@ -3,74 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video Generator</title>
+    <title>AI Video Generator | Sesh</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>AI Video Generator</h1>
+        <div class="header-container">
+            <h1><span>Sesh</span> Video Generator</h1>
+            <p class="subheading">Generate amazing AI videos from text prompts using cutting-edge models</p>
+        </div>
         
         <div class="form-container">
             <div class="input-group">
-                <label for="prompt">Enter your prompt:</label>
-                <textarea id="prompt" placeholder="Describe the video you want to generate..."></textarea>
+                <label for="prompt"><i class="fas fa-wand-magic-sparkles"></i> Enter your prompt</label>
+                <textarea id="prompt" placeholder="Describe the video you want to generate in detail. The more specific, the better results you'll get..."></textarea>
+                <p class="help-text">Be specific and descriptive. For example: "A cinematic shot of a futuristic city with flying cars, golden hour lighting, 4K, detailed"</p>
             </div>
             
-            <div class="input-group">
-                <label for="duration">Duration (seconds):</label>
-                <input type="number" id="duration" value="5" min="1" max="60">
-            </div>
-            
-            <div class="input-group">
-                <label>Model:</label>
-                <select id="model">
-                    <option value="google/veo-2" selected>Google VEO 2</option>
-                    <option value="kwaivgi/kling-v1.6-pro">Kling V1.6 Pro</option>
-                    <option value="luma/ray-flash-2-720p">Luma Ray Flash 720p</option>
-                    <option value="minimax/video-01-live">Minimax Video Live</option>
-                    <option value="wavespeedai/wan-2.1-t2v-720p">Wavespeed Wan 2.1 T2V (720p)</option>
-                    <option value="wavespeedai/wan-2.1-i2v-720p">Wavespeed Wan 2.1 I2V (720p)</option>
-                </select>
+            <div class="two-col">
+                <div class="input-group">
+                    <label for="model"><i class="fas fa-microchip"></i> AI Model</label>
+                    <select id="model">
+                        <option value="google/veo-2" selected>Google VEO 2</option>
+                        <option value="kwaivgi/kling-v1.6-pro">Kling V1.6 Pro</option>
+                        <option value="luma/ray-flash-2-720p">Luma Ray Flash 720p</option>
+                        <option value="minimax/video-01-live">Minimax Video Live</option>
+                        <option value="wavespeedai/wan-2.1-t2v-720p">Wavespeed Wan 2.1 T2V (720p)</option>
+                        <option value="wavespeedai/wan-2.1-i2v-720p">Wavespeed Wan 2.1 I2V (720p)</option>
+                    </select>
+                    <p class="help-text">Different models have different strengths and capabilities</p>
+                </div>
+                
+                <div class="input-group">
+                    <label for="duration"><i class="fas fa-clock"></i> Duration (seconds)</label>
+                    <input type="number" id="duration" value="5" min="1" max="60">
+                    <p class="help-text">Longer durations may take more time to generate</p>
+                </div>
             </div>
             
             <div class="input-group" id="start-image-group" style="display: none;">
-                <label for="start-image">Start Image URL:</label>
+                <label for="start-image"><i class="fas fa-image"></i> Start Image URL</label>
                 <input type="text" id="start-image" placeholder="https://example.com/image.jpg">
-                <p class="help-text">Required for Kling model. Enter a URL to an image to use as starting point.</p>
+                <p class="help-text">Required for some models. Enter a URL to an image to use as starting point.</p>
             </div>
             
             <div class="input-group" id="end-image-group" style="display: none;">
-                <label for="end-image">End Image URL (optional):</label>
+                <label for="end-image"><i class="fas fa-images"></i> End Image URL (optional)</label>
                 <input type="text" id="end-image" placeholder="https://example.com/image.jpg">
-                <p class="help-text">Optional for Kling model. If provided, the video will transition to this image.</p>
+                <p class="help-text">Optional for some models. If provided, the video will transition to this image.</p>
             </div>
             
             <div class="input-group" id="negative-prompt-group" style="display: none;">
-                <label for="negative-prompt">Negative Prompt (optional):</label>
+                <label for="negative-prompt"><i class="fas fa-ban"></i> Negative Prompt (optional)</label>
                 <textarea id="negative-prompt" placeholder="Things you do not want to see in the video..."></textarea>
-                <p class="help-text">Optional for Kling model. Specify things you don't want in the generated video.</p>
+                <p class="help-text">Optional for some models. Specify things you don't want in the generated video.</p>
             </div>
             
             <div class="input-group" id="cfg-scale-group" style="display: none;">
-                <label for="cfg-scale">CFG Scale (0.1-1.0):</label>
+                <label for="cfg-scale"><i class="fas fa-sliders"></i> CFG Scale (0.1-1.0): <span id="cfg-scale-value">0.5</span></label>
                 <input type="range" id="cfg-scale" min="0.1" max="1.0" step="0.1" value="0.5">
-                <span id="cfg-scale-value">0.5</span>
                 <p class="help-text">Controls flexibility in video generation. Higher values = stronger prompt adherence.</p>
             </div>
             
             <div class="input-group" id="aspect-ratio-group" style="display: none;">
-                <label for="aspect-ratio">Aspect Ratio:</label>
+                <label for="aspect-ratio"><i class="fas fa-rectangle"></i> Aspect Ratio</label>
                 <select id="aspect-ratio">
-                    <option value="16:9" selected>16:9</option>
-                    <option value="4:3">4:3</option>
-                    <option value="1:1">1:1</option>
-                    <option value="9:16">9:16</option>
+                    <option value="16:9" selected>16:9 (Landscape)</option>
+                    <option value="4:3">4:3 (Standard)</option>
+                    <option value="1:1">1:1 (Square)</option>
+                    <option value="9:16">9:16 (Portrait)</option>
                 </select>
                 <p class="help-text">Only used if no start image is provided.</p>
             </div>
             
             <div class="input-group" id="loop-group" style="display: none;">
-                <label for="loop">Loop Video:</label>
+                <label><i class="fas fa-repeat"></i> Loop Video</label>
                 <div class="checkbox-container">
                     <input type="checkbox" id="loop">
                     <span class="help-text">Create a seamless loop where the last frame matches the first</span>
@@ -78,7 +89,7 @@
             </div>
             
             <div class="input-group" id="prompt-optimizer-group" style="display: none;">
-                <label for="prompt-optimizer">Prompt Optimizer:</label>
+                <label><i class="fas fa-wand-sparkles"></i> Prompt Optimizer</label>
                 <div class="checkbox-container">
                     <input type="checkbox" id="prompt-optimizer" checked>
                     <span class="help-text">Enhance your prompt for better results</span>
@@ -86,20 +97,20 @@
             </div>
             
             <div class="input-group" id="max-area-group" style="display: none;">
-                <label for="max-area">Max Area:</label>
+                <label for="max-area"><i class="fas fa-expand"></i> Max Resolution</label>
                 <select id="max-area">
-                    <option value="720x1280" selected>720x1280 (Portrait)</option>
-                    <option value="1280x720">1280x720 (Landscape)</option>
-                    <option value="1024x1024">1024x1024 (Square)</option>
+                    <option value="720x1280" selected>720x1280 (Portrait HD)</option>
+                    <option value="1280x720">1280x720 (Landscape HD)</option>
+                    <option value="1024x1024">1024x1024 (Square HD)</option>
                 </select>
                 <p class="help-text">Maximum resolution for generated video</p>
             </div>
 
-            <button id="generate-btn">Generate Video</button>
+            <button id="generate-btn"><i class="fas fa-film"></i> Generate Video</button>
         </div>
         
         <div class="result-container hidden">
-            <h2>Your Generated Video</h2>
+            <h2><i class="fas fa-video"></i> Your Generated Video</h2>
             <div class="video-container">
                 <video id="output-video" controls></video>
             </div>
@@ -107,9 +118,13 @@
                 <div class="spinner"></div>
                 <p id="status-message">Generating your video...</p>
             </div>
-            <button id="download-btn" class="hidden">Download Video</button>
+            <button id="download-btn" class="hidden"><i class="fas fa-download"></i> Download Video</button>
         </div>
     </div>
+
+    <footer>
+        <p>Made with <i class="fas fa-heart"></i> by Sesh | Powered by Replicate API</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
