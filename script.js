@@ -232,35 +232,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`/api/predictions/${predictionId}`);
             
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to get prediction status');
+                let errorText = `Failed to get status: ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorText = errorData.error || errorText;
+                } catch (jsonError) {
+                    // Could not parse JSON, use status text
+                }
+                throw new Error(errorText);
             }
             
             const data = await response.json();
             const status = data.status;
             
+            statusMessage.textContent = `Status: ${status}...`; // Update status more regularly
+            
             if (status === 'succeeded') {
                 // The prediction is complete, show the video
-                videoUrl = data.output;
+                 videoUrl = data.output;
                 
                 if (typeof videoUrl === 'string') {
-                    // Single output (URL)
                     videoElement.src = videoUrl;
                 } else if (Array.isArray(videoUrl)) {
-                    // Array of URLs (some models return array)
                     videoElement.src = videoUrl[0];
-                } else {
-                    // Object with multiple outputs
-                    videoElement.src = videoUrl.video || videoUrl.gif || Object.values(videoUrl)[0];
+                } else if (videoUrl && typeof videoUrl === 'object'){
+                    // Handle cases where output might be an object with video URL
+                    videoElement.src = videoUrl.video || videoUrl.url || videoUrl[0] || Object.values(videoUrl)[0];
                 }
                 
+                if (!videoElement.src) {
+                     throw new Error('Processing succeeded, but no video URL found in output.');
+                }
+
                 loadingElement.classList.add('hidden');
                 videoElement.classList.remove('hidden');
                 downloadBtn.classList.remove('hidden');
                 generateBtn.disabled = false;
                 statusMessage.textContent = 'Video generation complete!';
+
             } else if (status === 'failed') {
-                throw new Error(data.error || 'Video generation failed');
+                let errorDetail = data.error || 'Unknown error during generation';
+                 // Try to get more specific error details if available
+                if (data.logs) {
+                    const logs = data.logs.split('\n').filter(log => log.toLowerCase().includes('error'));
+                    if (logs.length > 0) errorDetail += ` | Last log: ${logs[logs.length - 1]}`;
+                }
+                throw new Error(errorDetail);
+            } else if (status === 'canceled') {
+                 throw new Error('Video generation was canceled.');
             } else {
                 // Still processing, poll again after a delay
                 if (data.logs) {
@@ -268,16 +287,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (logs.length > 0) {
                         const lastLog = logs[logs.length - 1];
                         if (lastLog.includes('%')) {
-                            statusMessage.textContent = `Generating your video: ${lastLog}`;
+                            statusMessage.textContent = `Generating: ${lastLog}`;
+                        } else {
+                             statusMessage.textContent = `Status: ${status}... (${lastLog.substring(0, 50)}...)`;
                         }
+                    } else {
+                         statusMessage.textContent = `Status: ${status}...`;
                     }
                 }
-                setTimeout(pollPredictionStatus, 2000);
+                 // Continue polling
+                setTimeout(pollPredictionStatus, 3000); // Poll slightly less frequently
             }
         } catch (error) {
             console.error('Error polling status:', error);
-            statusMessage.textContent = `Error: ${error.message}`;
+            statusMessage.textContent = `Error: ${error.message}. Please check Vercel logs or Replicate dashboard.`;
+            loadingElement.classList.add('hidden'); // Hide spinner on error
             generateBtn.disabled = false;
+            // Optionally reset predictionId if it's a fatal error
+            // predictionId = null;
         }
     }
     
