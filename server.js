@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -9,18 +10,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.')); // Serve static files from current directory
+app.use(express.static(path.join(__dirname)));
 
 // Replicate API key from environment variables
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY;
-
-if (!REPLICATE_API_KEY) {
-    console.error('REPLICATE_API_KEY is not set in environment variables');
-    // In production, don't exit the process as it will crash the serverless function
-    if (process.env.NODE_ENV !== 'production') {
-        process.exit(1);
-    }
-}
 
 // API endpoint to create a prediction
 app.post('/api/predict', async (req, res) => {
@@ -103,9 +96,9 @@ app.post('/api/predictions/:id/cancel', async (req, res) => {
     }
 });
 
-// Root route for health check
-app.get('/', (req, res) => {
-    res.sendFile('index.html', { root: '.' });
+// Root route to serve index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start server in non-Vercel environments
