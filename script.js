@@ -205,25 +205,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     input: input
                 })
             });
-            
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to start video generation');
+                 const error = await response.json();
+                 throw new Error(error.error || 'Failed to start video generation');
             }
-            
+
             const data = await response.json();
             predictionId = data.id;
-            
+
             // Start polling for prediction status
             statusMessage.textContent = 'Generating your video (this may take a few minutes)...';
             pollPredictionStatus();
+
         } catch (error) {
             console.error('Error:', error);
             statusMessage.textContent = `Error: ${error.message}`;
-            generateBtn.disabled = false;
+             generateBtn.disabled = false;
         }
     }
-    
+
     // Function to poll for prediction status
     async function pollPredictionStatus() {
         if (!predictionId) return;
